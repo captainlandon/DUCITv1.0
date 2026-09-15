@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Compose owns in-app theming (see ui/theme). This XML theme only
+         governs the window background shown before Compose takes over,
+         so it stays dark to avoid a white flash on a dark launcher. -->
+    <style name="Theme.Ducit" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+    </style>
+</resources>

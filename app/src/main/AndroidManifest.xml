@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name=".DucitApplication"
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Ducit"
+        android:supportsRtl="true">
+
+        <!--
+          The launcher is a persistent surface, not the entire product
+          (Intelligence-to-Implementation Dossier v1.0, Decision Register:
+          "Launcher is persistent surface, not entire product" — Canonical).
+          Declaring HOME/DEFAULT makes Ducit selectable as a launcher on the
+          founder's private S25 prototype; it does not force a replacement
+          and the user can always decline it in the system chooser.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Ducit">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

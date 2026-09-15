@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ducit</string>
+    <string name="search_apps_placeholder">Search apps</string>
+    <string name="empty_state_no_apps">No apps match your search</string>
+</resources>
