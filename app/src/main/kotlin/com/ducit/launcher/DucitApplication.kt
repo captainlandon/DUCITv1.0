@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.ducit.data.local.DucitDatabase
 import com.ducit.launcher.data.InstalledAppRepository
+import com.ducit.launcher.data.PersonalContextRecordRepository
 
 /**
  * Owns the process-lifetime singletons: the Room database and the
@@ -19,6 +20,9 @@ class DucitApplication : Application() {
     lateinit var installedAppRepository: InstalledAppRepository
         private set
 
+    lateinit var personalContextRecordRepository: PersonalContextRecordRepository
+        private set
+
     override fun onCreate() {
         super.onCreate()
         database = Room.databaseBuilder(this, DucitDatabase::class.java, DucitDatabase.DATABASE_NAME)
@@ -26,6 +30,9 @@ class DucitApplication : Application() {
         installedAppRepository = InstalledAppRepository(
             context = applicationContext,
             dao = database.installedAppDao(),
+        )
+        personalContextRecordRepository = PersonalContextRecordRepository(
+            dao = database.personalContextRecordDao(),
         )
     }
 }

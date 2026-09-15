@@ -10,9 +10,9 @@ production core.
 
 ## Status: Sprint 1 (Foundation and truth reset), in progress
 
-This commit implements the first half of the dossier's two-week Sprint 1
-(days 1-6 of 10). **Nothing here claims to be more finished than it is** —
-see [What is *not* built yet](#what-is-not-built-yet) before assuming any
+This commit implements days 1-9 of the dossier's ten-day Sprint 1.
+**Nothing here claims to be more finished than it is** — see
+[What is *not* built yet](#what-is-not-built-yet) before assuming any
 capability beyond what's listed below.
 
 ### What's built and verified
@@ -24,10 +24,12 @@ capability beyond what's listed below.
 | Deterministic R0-R5 risk classifier | `core/domain-policy/RiskClassifier.kt` | 9 unit tests pass locally |
 | Deterministic governance policy engine (ALLOW/DENY/APPROVAL_REQUIRED) | `core/domain-policy/GovernancePolicyEngine.kt` | 6 unit tests pass locally |
 | Transaction state machine (DRAFT → ... → RECEIPTED) | `core/domain-policy/TransactionStateMachine.kt` | 9 unit tests pass locally, including the property test "no R4 transaction ever reaches READY without a granted approval" |
+| PersonalContextRecord lifecycle (capture/confirm/correct/dispute/restrict-purpose/delete) | `core/domain-policy/PersonalContextRecordLifecycle.kt` | 8 unit tests pass locally |
 | Room persistence (installed-app cache, PersonalContextRecord, transaction state) | `core/data-local` | **Written, not locally compiled — see below** |
 | Offline app-grid launcher (PackageManager discovery, search, launch) | `app` | **Written, not locally compiled — see below** |
+| Memory Inspector (capture form, record list, Because/Last verified/Used for detail, confirm/correct/dispute/restrict-purpose/delete) | `app/.../ui/memory` | **Written, not locally compiled — see below** |
 
-**29 domain-layer unit tests, all passing**, run with:
+**37 domain-layer unit tests, all passing**, run with:
 
 ```
 ./gradlew :core:domain-model:test :core:domain-policy:test
@@ -52,19 +54,24 @@ builds. Full account of this in
 
 ### What is *not* built yet
 
-Everything past Sprint 1 days 1-6, honestly:
+Everything past Sprint 1 day 9, honestly:
 
-- PersonalContextRecord capture UI / Memory Inspector (days 6-9)
+- Day 10's truth audit against the React demo doesn't apply — there is no
+  React demo in *this* repo to audit against.
 - Any AI/model integration whatsoever (by design — Sprint 1 requires none)
-- Now Cards, Command surface, Capture, Plan preview, Approval, Receipt UI
+- Now Cards, Command surface, Capture (share-target), Plan preview,
+  Approval, Receipt UI
 - Intent/capability resolution, connector registry, orchestration engine
 - Real execution adapters (Android intents beyond `getLaunchIntentForPackage`)
 - Trust Receipt hashing/chaining, deletion + meta-receipt
+- Process-death recovery tests for the transaction state machine (the
+  state machine itself is tested; persistence-survives-a-kill is not yet)
 - Everything gated behind ADR-01 through ADR-08 (all open — see
   [`docs/adr/`](docs/adr/))
 
 See the Dossier's section 8 (Ordered engineering backlog) for the full
-picture; this repo currently addresses B-002 and slices of B-003.
+picture; this repo currently addresses B-002, B-004, and B-005, plus a
+slice of B-003.
 
 ## Governing invariants this code enforces today
 
@@ -85,6 +92,14 @@ From Verbal Reference Implementation v1.0, section 1.2, the ones the
 - **INV-09** — every durable proposition/record has provenance or is
   explicitly marked unknown (constructor `require()`s in `Proposition`
   and `PersonalContextRecord`).
+- **INV-11** — deletion is real, not cosmetic: `PersonalContextRecordLifecycle.delete`
+  flips `deletionState` and clears the purpose allowlist; the DAO's
+  `observeRetrievable()` query excludes deleted/superseded rows at the SQL
+  level, not just in application code.
+- Correction propagation (Verbal Reference Implementation v1.0, section
+  17.2) — `PersonalContextRecordLifecycle.correct` never overwrites a
+  record in place; it supersedes the old one and creates a new one, so
+  the original evidence is preserved rather than falsified.
 
 ## Module map
 
