@@ -116,6 +116,7 @@ fun MemoryScreen(
 
     if (state.isCaptureOpen) {
         CaptureDialog(
+            initialValue = state.captureInitialValue,
             onDismiss = viewModel::closeCapture,
             onSubmit = { subject, predicate, value, purpose, sensitivity ->
                 viewModel.capture(subject, predicate, value, purpose, sensitivity)
@@ -233,12 +234,13 @@ private fun DetailField(label: String, value: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CaptureDialog(
+    initialValue: String = "",
     onDismiss: () -> Unit,
     onSubmit: (subject: String, predicate: String, value: String, purpose: List<String>, sensitivity: SensitivityClass) -> Unit,
 ) {
-    var subject by remember { mutableStateOf("") }
-    var predicate by remember { mutableStateOf("") }
-    var value by remember { mutableStateOf("") }
+    var subject by remember { mutableStateOf(if (initialValue.isBlank()) "" else "user") }
+    var predicate by remember { mutableStateOf(if (initialValue.isBlank()) "" else "shared") }
+    var value by remember { mutableStateOf(initialValue) }
     var purpose by remember { mutableStateOf("") }
     var sensitivity by remember { mutableStateOf(SensitivityClass.STANDARD) }
     var sensitivityMenuExpanded by remember { mutableStateOf(false) }

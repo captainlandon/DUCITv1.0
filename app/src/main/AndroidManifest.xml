@@ -27,6 +27,20 @@
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+            <!--
+              Capture via Android share (Intelligence-to-Implementation
+              Dossier v1.0, section 6, Capture surface: "Receive text/URL/
+              selected content through direct entry and Android share").
+              Shared text pre-fills the Memory capture dialog rather than
+              being saved silently — the user still sees and approves what
+              gets remembered before it's persisted.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
     </application>
 

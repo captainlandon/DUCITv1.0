@@ -28,6 +28,7 @@ capability beyond what's listed below.
 | Room persistence (installed-app cache, PersonalContextRecord, transaction state) | `core/data-local` | **Written, not locally compiled — see below** |
 | Offline app-grid launcher (PackageManager discovery, search, launch) | `app` | **Written, not locally compiled — see below** |
 | Memory Inspector (capture form, record list, Because/Last verified/Used for detail, confirm/correct/dispute/restrict-purpose/delete) | `app/.../ui/memory` | **Written, not locally compiled — see below** |
+| Capture via Android share (`ACTION_SEND text/plain` pre-fills the capture dialog; never saves silently) | `MainActivity`, `MemoryViewModel.openCaptureWithPrefill` | **Written, not locally compiled — see below** |
 
 **37 domain-layer unit tests, all passing**, run with:
 
@@ -59,8 +60,7 @@ Everything past Sprint 1 day 9, honestly:
 - Day 10's truth audit against the React demo doesn't apply — there is no
   React demo in *this* repo to audit against.
 - Any AI/model integration whatsoever (by design — Sprint 1 requires none)
-- Now Cards, Command surface, Capture (share-target), Plan preview,
-  Approval, Receipt UI
+- Now Cards, Command surface, Plan preview, Approval, Receipt UI
 - Intent/capability resolution, connector registry, orchestration engine
 - Real execution adapters (Android intents beyond `getLaunchIntentForPackage`)
 - Trust Receipt hashing/chaining, deletion + meta-receipt

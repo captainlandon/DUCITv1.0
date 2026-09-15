@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 data class MemoryUiState(
     val records: List<PersonalContextRecord> = emptyList(),
     val isCaptureOpen: Boolean = false,
+    val captureInitialValue: String = "",
     val selectedRecordId: String? = null,
 ) {
     val selectedRecord: PersonalContextRecord?
@@ -36,14 +37,22 @@ class MemoryViewModel(
 ) : ViewModel() {
 
     private val isCaptureOpen = MutableStateFlow(false)
+    private val captureInitialValue = MutableStateFlow("")
+    private var pendingSourceType = "manual-entry"
     private val selectedRecordId = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<MemoryUiState> = combine(
         repository.observeRecords(),
         isCaptureOpen,
+        captureInitialValue,
         selectedRecordId,
-    ) { records, captureOpen, selectedId ->
-        MemoryUiState(records = records, isCaptureOpen = captureOpen, selectedRecordId = selectedId)
+    ) { records, captureOpen, initialValue, selectedId ->
+        MemoryUiState(
+            records = records,
+            isCaptureOpen = captureOpen,
+            captureInitialValue = initialValue,
+            selectedRecordId = selectedId,
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -51,11 +60,24 @@ class MemoryViewModel(
     )
 
     fun openCapture() {
+        pendingSourceType = "manual-entry"
+        captureInitialValue.value = ""
+        isCaptureOpen.value = true
+    }
+
+    /** Entry point for Android share-target capture (Dossier v1.0, section
+     * 6 Capture surface): pre-fills the dialog rather than saving the
+     * shared text directly, so the user still sees and approves what gets
+     * remembered — sharing is never silent collection. */
+    fun openCaptureWithPrefill(value: String, sourceType: String = "android-share") {
+        pendingSourceType = sourceType
+        captureInitialValue.value = value
         isCaptureOpen.value = true
     }
 
     fun closeCapture() {
         isCaptureOpen.value = false
+        captureInitialValue.value = ""
     }
 
     fun capture(
@@ -66,17 +88,20 @@ class MemoryViewModel(
         sensitivityClass: SensitivityClass,
     ) {
         if (subject.isBlank() || predicate.isBlank() || value.isBlank()) return
+        val sourceType = pendingSourceType
         viewModelScope.launch {
             repository.capture(
                 entityId = "person:user",
                 subject = subject.trim(),
                 predicate = predicate.trim(),
                 value = value.trim(),
+                sourceType = sourceType,
                 sensitivityClass = sensitivityClass,
                 purposeAllowlist = purposeAllowlist,
                 retentionPolicy = RetentionClass.DURABLE_USER_MODEL,
             )
             isCaptureOpen.value = false
+            captureInitialValue.value = ""
         }
     }
 

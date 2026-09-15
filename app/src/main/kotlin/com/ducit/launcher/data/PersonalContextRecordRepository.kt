@@ -39,6 +39,7 @@ class PersonalContextRecordRepository(
         sensitivityClass: SensitivityClass,
         purposeAllowlist: List<String>,
         retentionPolicy: RetentionClass = RetentionClass.DURABLE_USER_MODEL,
+        sourceType: String = "manual-entry",
     ): PersonalContextRecord = withContext(Dispatchers.IO) {
         val record = PersonalContextRecordLifecycle.capture(
             recordId = newId(),
@@ -46,6 +47,7 @@ class PersonalContextRecordRepository(
             subject = subject,
             predicate = predicate,
             value = value,
+            sourceType = sourceType,
             sensitivityClass = sensitivityClass,
             purposeAllowlist = purposeAllowlist,
             retentionPolicy = retentionPolicy,
