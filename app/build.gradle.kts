@@ -58,8 +58,17 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.core)
+    // Extended, not core: core only has ~20 icons and doesn't include
+    // Bookmark, which the launcher's "open Memory" affordance uses. Sprint
+    // 1 optimizes for correctness over APK size; revisit if size matters
+    // before this ships beyond a private prototype.
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.kotlinx.coroutines.android)
+
+    // core:data-local's Room dependency is `implementation`-scoped (it
+    // doesn't leak to consumers by design), but DucitApplication calls
+    // Room.databaseBuilder(...) directly, so :app needs its own.
+    implementation(libs.room.runtime)
 
     debugImplementation(libs.compose.ui.tooling)
 

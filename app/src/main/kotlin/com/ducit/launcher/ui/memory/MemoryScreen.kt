@@ -18,14 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -280,21 +279,33 @@ private fun CaptureDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 )
-                ExposedDropdownMenuBox(
-                    expanded = sensitivityMenuExpanded,
-                    onExpandedChange = { sensitivityMenuExpanded = it },
-                ) {
-                    OutlinedTextField(
-                        value = sensitivity.name,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Sensitivity") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sensitivityMenuExpanded) },
+                // Plain Box + DropdownMenu rather than
+                // ExposedDropdownMenuBox/ExposedDropdownMenu: the latter's
+                // exact API shape has moved across Material3 versions, and
+                // this combination has been stable for years.
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor(),
-                    )
-                    ExposedDropdownMenu(
+                            .clickable { sensitivityMenuExpanded = true }
+                            .padding(vertical = 12.dp),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Sensitivity",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = DucitOnSurfaceMuted,
+                            )
+                            Text(
+                                text = sensitivity.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                        }
+                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = DucitOnSurfaceMuted)
+                    }
+                    DropdownMenu(
                         expanded = sensitivityMenuExpanded,
                         onDismissRequest = { sensitivityMenuExpanded = false },
                     ) {

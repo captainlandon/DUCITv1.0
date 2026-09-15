@@ -56,9 +56,10 @@ class MainActivity : ComponentActivity() {
             BackHandler(enabled = showMemory) { showMemory = false }
 
             LaunchedEffect(pendingShare) {
-                if (pendingShare != null) {
+                val text = pendingShare
+                if (text != null) {
                     showMemory = true
-                    memoryViewModel.openCaptureWithPrefill(pendingShare)
+                    memoryViewModel.openCaptureWithPrefill(text)
                     sharedText.value = null
                 }
             }
