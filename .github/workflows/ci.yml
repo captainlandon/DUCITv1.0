@@ -42,8 +42,19 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # ubuntu-latest ships with an Android SDK preinstalled (ANDROID_HOME
+      # is already set) — we only need to accept licenses and make sure
+      # this project's exact compileSdk/build-tools are present.
+      # `android-actions/setup-android@v3` is deliberately NOT used here:
+      # it tries to install the legacy `tools` package, which Google
+      # removed from the SDK repository, so the action fails outright
+      # with "Failed to find package 'tools'" before the build even
+      # starts (see docs/adr/ADR-00-build-environment.md for how this was
+      # diagnosed).
+      - name: Accept Android SDK licenses and install required packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
       - name: Run Room/data-local unit tests
