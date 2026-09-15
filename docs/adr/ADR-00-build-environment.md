@@ -60,3 +60,20 @@ signal collected to date.** The `android-build` job's Gradle steps
 (`assembleDebug`, `:core:data-local:test`, `lintDebug`) have still never
 actually executed — check the next CI run after this fix lands before
 trusting that `:app`/`:core:data-local` compile.
+
+## Resolution: `:app`/`:core:data-local` now confirmed compiling
+
+The next CI run after the SDK fix (commit `d471481`) did execute
+`:app:compileDebugKotlin` for real and found four genuine bugs (missing
+`room-runtime` dependency in `:app`, a smart-cast failure, a missing
+icon, and a Compose-BOM-version-sensitive API) — see commit `f6059e1`
+for the fixes. The run after that, on commit `f6059e1`
+([run 35005218207](https://github.com/captainlandon/DUCITv1.0/actions/runs/35005218207)),
+is fully green: `Assemble debug APK`, `Run Room/data-local unit tests`,
+and `Lint` all passed, and a debug APK was produced.
+
+**As of commit `f6059e1`, both `domain-tests` and `android-build` are
+green.** The build-environment gap this ADR documents (no local
+`dl.google.com` route) is still real for any future sandboxed session,
+but it is no longer an open question for *this* code — CI is the
+verification path, and it currently passes end to end.

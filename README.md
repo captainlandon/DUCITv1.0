@@ -25,10 +25,10 @@ capability beyond what's listed below.
 | Deterministic governance policy engine (ALLOW/DENY/APPROVAL_REQUIRED) | `core/domain-policy/GovernancePolicyEngine.kt` | 6 unit tests pass locally |
 | Transaction state machine (DRAFT → ... → RECEIPTED) | `core/domain-policy/TransactionStateMachine.kt` | 9 unit tests pass locally, including the property test "no R4 transaction ever reaches READY without a granted approval" |
 | PersonalContextRecord lifecycle (capture/confirm/correct/dispute/restrict-purpose/delete) | `core/domain-policy/PersonalContextRecordLifecycle.kt` | 8 unit tests pass locally |
-| Room persistence (installed-app cache, PersonalContextRecord, transaction state) | `core/data-local` | **Written, not locally compiled — see below** |
-| Offline app-grid launcher (PackageManager discovery, search, launch) | `app` | **Written, not locally compiled — see below** |
-| Memory Inspector (capture form, record list, Because/Last verified/Used for detail, confirm/correct/dispute/restrict-purpose/delete) | `app/.../ui/memory` | **Written, not locally compiled — see below** |
-| Capture via Android share (`ACTION_SEND text/plain` pre-fills the capture dialog; never saves silently) | `MainActivity`, `MemoryViewModel.openCaptureWithPrefill` | **Written, not locally compiled — see below** |
+| Room persistence (installed-app cache, PersonalContextRecord, transaction state) | `core/data-local` | Compiles + `:core:data-local:test` passes in CI |
+| Offline app-grid launcher (PackageManager discovery, search, launch) | `app` | `:app:assembleDebug` passes in CI |
+| Memory Inspector (capture form, record list, Because/Last verified/Used for detail, confirm/correct/dispute/restrict-purpose/delete) | `app/.../ui/memory` | `:app:assembleDebug` + `:app:lintDebug` pass in CI |
+| Capture via Android share (`ACTION_SEND text/plain` pre-fills the capture dialog; never saves silently) | `MainActivity`, `MemoryViewModel.openCaptureWithPrefill` | `:app:assembleDebug` passes in CI |
 
 **37 domain-layer unit tests, all passing**, run with:
 
@@ -42,15 +42,19 @@ domain layer; JVM-testable without Android"). That's what makes the
 governance invariants below independently checkable without a device,
 emulator, or even the Android SDK.
 
-### Build-environment caveat (read this before trusting `:app`)
+### Build-environment note
 
 `core:data-local` and `:app` depend on the Android Gradle Plugin and
-AndroidX/Compose/Room, which live on Google's Maven repository. The
-sandbox that authored this code had no route to `dl.google.com`, so those
-two modules were written and reviewed but **never actually compiled in
-this session**. `.github/workflows/ci.yml`'s `android-build` job is the
-first real compiler check they get — check it before assuming the app
-builds. Full account of this in
+AndroidX/Compose/Room, which live on Google's Maven repository — the
+sandbox that wrote most of this code had no route to `dl.google.com`, so
+those two modules were authored and reviewed without a local compile.
+CI's `android-build` job caught four real bugs from that blind spot on
+its first successful run (missing dependency, a smart-cast issue, a
+missing icon, a version-sensitive API) before landing green. **As of
+[run 35005218207](https://github.com/captainlandon/DUCITv1.0/actions/runs/35005218207),
+`:app:assembleDebug`, `:core:data-local:test`, and `:app:lintDebug` all
+pass in CI.** Full account, including the diagnosis of a second,
+unrelated CI infrastructure bug, in
 [`docs/adr/ADR-00-build-environment.md`](docs/adr/ADR-00-build-environment.md).
 
 ### What is *not* built yet
@@ -66,6 +70,14 @@ Everything past Sprint 1 day 9, honestly:
 - Trust Receipt hashing/chaining, deletion + meta-receipt
 - Process-death recovery tests for the transaction state machine (the
   state machine itself is tested; persistence-survives-a-kill is not yet)
+- **Any on-device verification.** CI proves the code compiles, passes
+  its unit tests, and passes lint — it does not prove the launcher is
+  usable, that cold-start/app-launch timing is acceptable, or that a
+  process kill mid-transaction actually reconciles cleanly on a real
+  phone. The Dossier's Sprint 1 acceptance criteria (Days 1-2: "cold
+  start target measured... app launching works offline"; Days 4-6:
+  "process-kill test does not lose or misreport canonical state") are
+  device tests, not CI jobs, and haven't been run on the founder's S25.
 - Everything gated behind ADR-01 through ADR-08 (all open — see
   [`docs/adr/`](docs/adr/))
 
