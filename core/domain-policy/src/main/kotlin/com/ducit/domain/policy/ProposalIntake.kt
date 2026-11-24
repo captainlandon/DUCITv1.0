@@ -7,7 +7,22 @@ import com.ducit.domain.model.UntrustedActionProposal
 /** Structural/evidence screening, NOT an execution authorization.
  * All allowlists and propositions must come from trusted host state, not a model.
  * Risk facts, authority matching, approvals and postconditions remain host-owned. */
+fun interface ProposalParameterValidator {
+    fun accepts(capability: CapabilityDomain, parameters: Map<String, String>): Boolean
+}
+
 object ProposalIntake {
+    /** Additional trusted-host gate before advancing a candidate to authorization.
+     * Structural screening alone is never sufficient for execution. */
+    fun semanticRejectionReasons(
+        proposal: UntrustedActionProposal,
+        validator: ProposalParameterValidator?,
+    ): List<String> {
+        if (validator == null) return listOf("MISSING_PARAMETER_VALIDATOR")
+        return if (runCatching { validator.accepts(proposal.capability, proposal.parameters.toMap()) }.getOrDefault(false))
+            emptyList() else listOf("INVALID_PARAMETER_SEMANTICS")
+    }
+
     fun rejectionReasons(
         proposal: UntrustedActionProposal,
         allowedCapability: CapabilityDomain,
