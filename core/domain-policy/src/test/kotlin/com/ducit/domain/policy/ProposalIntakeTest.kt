@@ -12,6 +12,12 @@ class ProposalIntakeTest {
     private fun reasons(p: UntrustedActionProposal = proposal, facts: List<Proposition> = listOf(fact)) =
         ProposalIntake.rejectionReasons(p, CapabilityDomain.CAPTURE, "local:notes", setOf("text"), facts, "notes", 100L)
 
+    @Test fun `semantic validation fails closed`() {
+        assertTrue(ProposalIntake.semanticRejectionReasons(proposal, null).contains("MISSING_PARAMETER_VALIDATOR"))
+        assertTrue(ProposalIntake.semanticRejectionReasons(proposal, ProposalParameterValidator { _, _ -> false }).contains("INVALID_PARAMETER_SEMANTICS"))
+        assertTrue(ProposalIntake.semanticRejectionReasons(proposal, ProposalParameterValidator { _, _ -> error("failure") }).contains("INVALID_PARAMETER_SEMANTICS"))
+        assertTrue(ProposalIntake.semanticRejectionReasons(proposal, ProposalParameterValidator { _, params -> !params["text"].isNullOrBlank() }).isEmpty())
+    }
     @Test fun `accepts structurally scoped candidate without granting execution authority`() {
         assertTrue(reasons().isEmpty())
     }
