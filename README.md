@@ -155,3 +155,9 @@ this repo — they're external planning artifacts, referenced by name):
 
 Decisions this repo has *not* made are tracked as open ADRs in
 [`docs/adr/`](docs/adr/) rather than being silently assumed.
+
+
+
+## AI evidence implementation
+
+See [implementation and validation](docs/AI_IMPLEMENTATION.md) and [AI change review evidence](docs/AI_CHANGE_EVIDENCE.md) for this bounded implementation, test results and remaining gates.
